@@ -143,6 +143,7 @@ public class Database {
 				// Check if the current game label is different from the last displayed one
 				if (!gameLabel.equals(lastGameLabel)) {
 					// Add a vertical space between games
+					moveNumber = 1;
 					if (row > 0) {
 						JPanel spacer = new JPanel();
 						spacer.setBackground(new Color(0, 45, 57));
