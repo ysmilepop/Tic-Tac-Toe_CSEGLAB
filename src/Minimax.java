@@ -8,8 +8,6 @@ public class Minimax {
         if (TicTacToe.isDraw(board)) {
             return 0;
         }
-        
-        //taena
 
         if (isMaximizing) {
             int bestScore = Integer.MIN_VALUE;
