@@ -27,6 +27,7 @@ public class TicTacToe extends JFrame {
     private Connection conn;
     private Minimax minimax;
     private Database db;
+    int moveNumber = 1;
 
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
@@ -101,21 +102,25 @@ public class TicTacToe extends JFrame {
             return;
         }
 
+        // Store the initial result as ongoing
+        int gameId = db.storeResult("ongoing", boardToString()); // Store ongoing result only once
+
         // Human move
         board[row][col] = HUMAN_PLAYER;
         button.setText("O");
         button.setBackground(new Color(0, 255, 0));
 
+        db.storeMove(gameId, "human", row, col, boardToString()); // Log human move
+
         if (isWinner(board, HUMAN_PLAYER)) {
-            System.out.println("Human wins!");
             isEndgame = true;
-            db.storeResult("win", boardToString());
+            db.storeResult("win", boardToString()); // Update result to win
             JOptionPane.showMessageDialog(this, "Human wins!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
             return;
         } else if (isDraw(board)) {
-            System.out.println("It's a draw!");
             isEndgame = true;
-            db.storeResult("draw", boardToString());
+            db.storeResult("draw", boardToString()); // Update result to draw
+            JOptionPane.showMessageDialog(this, "Draw", "Game Over", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
@@ -125,18 +130,18 @@ public class TicTacToe extends JFrame {
             board[aiMove[0]][aiMove[1]] = AI_PLAYER;
             buttons[aiMove[0]][aiMove[1]].setText("X");
             buttons[aiMove[0]][aiMove[1]].setBackground(new Color(255, 0, 0));
+
+           db.storeMove(gameId, "AI", aiMove[0], aiMove[1], boardToString()); // Log AI move
         }
 
         if (isWinner(board, AI_PLAYER)) {
-            System.out.println("AI wins!");
             isEndgame = true;
-            db.storeResult("loss", boardToString());
+            db.storeResult("loss", boardToString()); // Update result to loss
             JOptionPane.showMessageDialog(this, "AI wins!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
         } else if (isDraw(board)) {
-            System.out.println("It's a draw!");
             isEndgame = true;
-            db.storeResult("draw", boardToString());
-            JOptionPane.showMessageDialog(this, "Draw!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+            db.storeResult("draw", boardToString()); // Update result to draw
+            JOptionPane.showMessageDialog(this, "Draw", "Game Over", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
@@ -183,6 +188,15 @@ public class TicTacToe extends JFrame {
 
     // Show game history from the database
     private void showGameHistory() {
+    	db.moveNumber = 1;
         db.showGameHistory();
+    
+    
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+        @Override
+        public void run() {
+            db.clearDatabase();  // Call the method to clear the database
+        }
+    });
     }
 }
